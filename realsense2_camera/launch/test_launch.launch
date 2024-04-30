@@ -1,0 +1,6 @@
+<launch>
+    <node name="time_republisher" pkg="realsense2_camera" type="time_republisher.py" output="screen">
+      <param name="image_topic" value="/camera/depth/color/points"/>
+      <param name="republished_image_topic" value="/camera/depth/color_points"/>
+    </node>
+</launch>

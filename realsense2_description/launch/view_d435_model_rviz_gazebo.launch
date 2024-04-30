@@ -1,6 +1,8 @@
 <launch>
     <!-- arguments for the urdf xacro file, rviz visualization and namespace -->
+    <arg name="use_sim_time"/>
     <arg name="start_gazebo" default="true"/>
+    <arg name="sim_d435"/>
     <arg name="model" default="$(find realsense2_description)/urdf/test_d435_camera.urdf.xacro"/>
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model) use_nominal_extrinsics:=true add_plug:=true" />
     <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher">
@@ -8,11 +10,24 @@
     </node>
 
     <!-- this will include the launch file for gazebo given the model -->  
-    <include file="$(find realsense2_description)/launch/gazebo.launch">
+    <include file="$(find realsense2_description)/launch/gazebo.launch" if="$(arg sim_d435)">
       <arg name="model" value="$(arg model)" />
       <!-- We wont need to start gazebo if kortex does it for us -->
       <arg name="start_gazebo" value="$(arg start_gazebo)" />
+      <arg name="use_sim_time" value="$(arg use_sim_time)" />
     </include>
+
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch" if="$(eval not sim_d435)">
+      <arg name="enable_pointcloud" value="true"/>
+      <param name="global_time_enabled" value="false"/>
+      <param name="/use_sim_time" value="true"/>
+      <arg name="initial_reset" value="true"/>
+    </include>
+
+    <node name="time_republisher" pkg="realsense2_camera" type="time_republisher.py"  if="$(eval not sim_d435)">
+      <param name="image_topic" value="/my_gen3_lite/d435/camera/depth/color/points"/>
+      <param name="republished_image_topic" value="/camera/depth/color/points"/>
+    </node>
 
     <arg name="gui" default="True" />
     <param name="use_gui" value="$(arg gui)" />
