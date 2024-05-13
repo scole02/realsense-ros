@@ -15,16 +15,16 @@ class TimeRepublisher:
         self.image_sub = rospy.Subscriber(image_topic, PointCloud2, self.image_callback)
         self.image_pub = rospy.Publisher(republished_image_topic, PointCloud2, queue_size=10)
 
-    def image_callback(self, data):
+    def image_callback(self, data: PointCloud2):
         # Get the current simulated time from /clock
         current_time = rospy.get_rostime()
         
         # Update the header timestamp of the image message
         data.header.stamp = current_time
+        data.header.frame_id = "camera_link"
         
         # Publish the image with simulated time
         self.image_pub.publish(data)
-        print("s")
 
 if __name__ == '__main__':
     
